@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoyu.wsts.workshop.dao.impl.mybatis.WorkshopUserMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.wsts.workshop.entity.WorkshopUser">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="WORKSHOP_ID" property="workshopId" jdbcType="VARCHAR"/>
+		<result column="USER_ID" property="user.id" jdbcType="VARCHAR"/>
+		<result column="ROLE" property="role" jdbcType="VARCHAR"/>
+		<result column="STATE" property="state" jdbcType="VARCHAR"/>
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR"/>
+		<result column="USER_REAL_NAME" property="user.realName" />
+		<result column="USER_AVATAR" property="user.avatar" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="VARCHAR"/>
+		
+		<result column="USER_ID" property="userInfo.id" jdbcType="VARCHAR"/>
+		<result column="USER_REAL_NAME" property="userInfo.realName" jdbcType="VARCHAR"/>
+		<result column="USER_DEPT_NAME" property="userInfo.department.deptName" jdbcType="VARCHAR"/>
+		<result column="USER_PAPERWORK_NO" property="userInfo.paperworkNo" jdbcType="VARCHAR"/>
+		<result column="ACTIVITY_NUM" property="actionInfo.activityNum" jdbcType="INTEGER" />
+		<result column="FAQ_ANSWER_NUM" property="actionInfo.faqAnswerNum" jdbcType="INTEGER" />
+		<result column="UPLOAD_RESOURCE_NUM" property="actionInfo.uploadResourceNum" jdbcType="INTEGER" />
+		<result column="COMMENTS_NUM" property="actionInfo.commentsNum" jdbcType="INTEGER" />
+		<result column="ANNOUNCEMENT_NUM" property="actionInfo.announcementNum" jdbcType="INTEGER" />
+		<result column="BIREFIND_NUM" property="actionInfo.birefindNum" jdbcType="INTEGER" />
+		<result column="FAQ_QUESTION_NUM" property="actionInfo.faqQuestionNum" jdbcType="INTEGER" />
+		<result column="ACTIVITY_COMPLETE_NUM" property="actionInfo.activityCompleteNum" jdbcType="INTEGER" />
+		
+		<result column="COMPLETE_VIDEO_NUM" property="actionInfo.completeVideoNum" jdbcType="INTEGER" />
+		<result column="COMPLETE_DISCUSSION_NUM" property="actionInfo.completeDiscussionNum" jdbcType="INTEGER" />
+		<result column="COMPLETE_LESSON_PLAN_NUM" property="actionInfo.completeLessonPlanNum" jdbcType="INTEGER" />
+		<result column="COMPLETE_LCEC_NUM" property="actionInfo.completeLcecNum" jdbcType="INTEGER" />
+		<result column="COMPLETE_TEST_NUM" property="actionInfo.completeTestNum" jdbcType="INTEGER" />
+		
+		<result column="RESULT_ID" property="workshopUserResult.id" jdbcType="VARCHAR"/>
+		<result column="POINT" property="workshopUserResult.point" jdbcType="DECIMAL"/>
+		<result column="WORKSHOP_RESULT" property="workshopUserResult.workshopResult" jdbcType="VARCHAR"/>
+		<result column="WORKSHOP_RESULT_CREATOR" property="workshopUserResult.workshopResultCreator.id" jdbcType="VARCHAR"/>
+		<result column="WORKSHOP_RESULT_CREATOR_NAME" property="workshopUserResult.workshopResultCreator.realName" jdbcType="VARCHAR"/>
+		<result column="FINALLY_RESULT" property="workshopUserResult.finallyResult" jdbcType="VARCHAR"/>
+		
+		<result column="WORKSHOP_ID" property="workshop.id" jdbcType="VARCHAR" />
+		<result column="TITLE" property="workshop.title" jdbcType="VARCHAR" />
+		<result column="SOURCE_ID" property="workshop.sourceId" jdbcType="VARCHAR" />
+		<result column="QUALIFIED_POINT" property="workshop.qualifiedPoint" jdbcType="DECIMAL" />
+		<result column="START_TIME" property="workshop.timePeriod.startTime" jdbcType="DATE" />
+		<result column="END_TIME" property="workshop.timePeriod.endTime" jdbcType="DATE" />
+		<result column="TYPE" property="workshop.type" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		WU.ID,WU.WORKSHOP_ID,WU.USER_ID,WU.ROLE,WU.STATE,WU.CREATOR,WU.CREATE_TIME,
+		WUR.ID RESULT_ID, WUR.WORKSHOP_RESULT,WORKSHOP_RESULT_CREATOR,FINALLY_RESULT,WUR.POINT,
+		W.TITLE,W.SOURCE_ID,W.QUALIFIED_POINT,W.START_TIME,W.END_TIME,W.TYPE,
+		(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = WU.USER_ID) USER_REAL_NAME,
+		(select BUV.AVATAR from BASE_USER_VIEW BUV where BUV.ID = WU.USER_ID) USER_AVATAR,
+		(select BUV.DEPT_NAME from BASE_USER_VIEW BUV where BUV.ID = WU.USER_ID) USER_DEPT_NAME,
+		(select BUV.PAPERWORK_NO from BASE_USER_VIEW BUV where BUV.ID = WU.USER_ID) USER_PAPERWORK_NO,
+		(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = WUR.WORKSHOP_RESULT_CREATOR) WORKSHOP_RESULT_CREATOR_NAME
+	</sql>
+	
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select	<include refid="Base_Column_List" />
+		from WORKSHOP_USER WU
+		join WORKSHOP_USER_RESULT WUR on WUR.WORKSHOP_USER_ID = WU.ID
+		join WORKSHOP W on W.ID = WU.WORKSHOP_ID and W.IS_DELETED = 'N'
+		where WU.IS_DELETED = 'N'
+		and WU.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="select" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List" />
+		from WORKSHOP_USER WU
+		join WORKSHOP_USER_RESULT WUR on WUR.WORKSHOP_USER_ID = WU.ID
+		join WORKSHOP W on W.ID = WU.WORKSHOP_ID and W.IS_DELETED = 'N'
+		where WU.IS_DELETED = 'N'
+		<if test="workshopId != null and workshopId != ''">
+			and WU.WORKSHOP_ID = #{workshopId,jdbcType=VARCHAR}
+		</if>
+		<if test="userId != null and userId != ''">
+			and WU.USER_ID = #{userId,jdbcType=VARCHAR}
+		</if>
+		<if test="role != null and role != ''">
+			and #{role}  like concat(concat('%',WU.ROLE),'%')
+		</if>
+		<if test="realName != null and realName != ''">
+			and exists (select 1 from BASE_USER_VIEW where ID = WU.USER_ID and REAL_NAME like '%${realName}%')			
+		</if>
+		<if test="deptName != null and deptName != ''">
+			and exists (select 1 from BASE_USER_VIEW where ID = WU.USER_ID and DEPT_NAME = #{deptName,jdbcType=VARCHAR})		
+		</if>
+		<if test="workshopResult != null and workshopResult != ''">
+			and WUR.WORKSHOP_RESULT = #{workshopResult,jdbcType=VARCHAR}
+		</if>
+		<if test="minPoint != null and minPoint != ''">
+			and WUR.POINT <![CDATA[>= ]]> #{minPoint,jdbcType=DECIMAL}
+		</if>
+		<if test="userIdNotEqual != null and userIdNotEqual != ''">
+			and WU.USER_ID != #{userIdNotEqual,jdbcType=VARCHAR}
+		</if>
+		<if test="title != null and title != ''">
+			and W.TITLE = #{title,jdbcType=VARCHAR}
+		</if>
+		<if test="type != null and type != ''">
+			and W.TYPE = #{type,jdbcType=VARCHAR}
+		</if>
+		<if test="startTimeGreaterThan != null">
+			and W.START_TIME <![CDATA[>]]>  #{startTimeGreaterThan,jdbcType=TIMESTAMP}
+		</if>
+		<if test="startTimeLessThanOrEquals != null">
+			and W.START_TIME <![CDATA[<=]]>  #{startTimeLessThanOrEquals,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endTimeGreaterThanOrEquals != null">
+			and W.END_TIME <![CDATA[>=]]>  #{endTimeGreaterThanOrEquals,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endTimeLessThan != null">
+			and W.END_TIME <![CDATA[<]]>  #{endTimeLessThan,jdbcType=TIMESTAMP}
+		</if>
+		<if test="workshopIds != null and workshopIds.size > 0 ">
+			and WU.WORKSHOP_ID in
+			<foreach collection="workshopIds" open="(" close=")" separator="," item="item">
+				#{item,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="userIds != null and userIds.size > 0 ">
+			and WU.USER_ID in
+			<foreach collection="userIds" open="(" close=")" separator="," item="item">
+				#{item,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="roles != null and roles.size > 0">
+			and WU.ROLE in
+			<foreach collection="roles" open="(" close=")" separator="," item="item">
+				#{item,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="relationId != null and relationId != ''">
+			and exists (select 1 from WORKSHOP_RELATION WR where WORKSHOP_ID = WU.WORKSHOP_ID and IS_DELETED = 'N'
+			and RELATION_ID = #{relationId})
+		</if>
+	</select>
+	
+	<select id="count" parameterType="java.util.Map" resultType="int">
+		select count(ID) from WORKSHOP_USER WU
+		where WU.IS_DELETED = 'N'
+		<if test="role != null and role != ''">
+			and #{role} like concat(concat('%',WU.ROLE),'%')
+		</if>
+		<if test="workshopId != null and workshopId != ''">
+			and WU.WORKSHOP_ID = #{workshopId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<insert id="insert" parameterType="com.haoyu.wsts.workshop.entity.WorkshopUser">
+		insert into WORKSHOP_USER
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">ID,</if>
+			<if test="workshopId != null">WORKSHOP_ID,</if>
+			<if test="user != null and user.id != null">USER_ID,</if>
+			<if test="role != null">ROLE,</if>
+			<if test="state != null">STATE,</if>
+			<if test="creator != null and creator.id != null">CREATOR,</if>
+			<if test="createTime != null">CREATE_TIME,</if>
+			<if test="version != null">VERSION,</if>
+			<if test="isDeleted != null">IS_DELETED,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">#{id,jdbcType=VARCHAR},</if>
+			<if test="workshopId != null">#{workshopId,jdbcType=VARCHAR},</if>
+			<if test="user != null and user.id != null">#{user.id,jdbcType=VARCHAR},</if>
+			<if test="role != null">#{role,jdbcType=VARCHAR},</if>
+			<if test="state != null">#{state,jdbcType=VARCHAR},</if>
+			<if test="creator != null and creator.id != null">#{creator.id,jdbcType=VARCHAR},</if>
+			<if test="createTime != null">#{createTime,jdbcType=VARCHAR},</if>
+			<if test="version != null">#{version,jdbcType=DECIMAL},</if>
+			<if test="isDeleted != null">#{isDeleted,jdbcType=VARCHAR},</if>
+		</trim>
+	</insert>
+	<select id="selectWithActionInfoByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select	WU.ID,WU.WORKSHOP_ID,WU.USER_ID,WU.ROLE,WU.STATE,WU.CREATOR,WU.CREATE_TIME,
+		
+			(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = WU.USER_ID) USER_REAL_NAME,
+			(select BUV.AVATAR from BASE_USER_VIEW BUV where BUV.ID = WU.USER_ID) USER_AVATAR,
+			(select BUV.DEPT_NAME from BASE_USER_VIEW BUV where BUV.ID = WU.USER_ID) USER_DEPT_NAME,
+		
+			WUR.POINT,WUR.WORKSHOP_RESULT,
+			W.TITLE,W.SOURCE_ID,W.QUALIFIED_POINT,W.START_TIME,W.END_TIME
+			,(select count(A.ID) from ACTIVITY A where A.IS_DELETED='N' and A.CREATOR = WU.USER_ID and A.RELATION_ID = WU.WORKSHOP_ID) ACTIVITY_NUM
+			,(select count(FA.ID) from FAQ_ANSWER FA join FAQ_QUESTION FQ on FA.QUESTION_ID = FQ.ID and FA.IS_DELETED='N' where FA.CREATOR = WU.USER_ID and FQ.RELATION_ID = WU.WORKSHOP_ID ) FAQ_ANSWER_NUM
+			,(select count(FR.ID) from FILE_RESOURCE FR join FILE_RELATION FR1 on FR.ID = FR1.FILE_ID and FR.IS_DELETED = 'N' where FR.CREATOR = WU.USER_ID and FR.IS_FOLDER = 'N' and FR1.RELATION_ID = WU.WORKSHOP_ID ) UPLOAD_RESOURCE_NUM
+			,(select count(C.ID) from COMMENTS C where C.IS_DELETED = 'N' and  C.RELATION_ID = WU.WORKSHOP_ID and C.CREATOR = WU.USER_ID) COMMENTS_NUM
+			,(select count(A.ID) from ANNOUNCEMENT A join ANNOUNCEMENT_RELATION AR on AR.ANNOUNCEMENT_ID = A.ID and A.IS_DELETED = 'N' and A.TYPE='workshop_announcement' where A.CREATOR = WU.USER_ID and AR.RELATION_ID = WU.WORKSHOP_ID) ANNOUNCEMENT_NUM
+			,(select count(A.ID) from ANNOUNCEMENT A join ANNOUNCEMENT_RELATION AR on AR.ANNOUNCEMENT_ID = A.ID and A.IS_DELETED = 'N' and A.TYPE='workshop_briefing' where A.CREATOR = WU.USER_ID and AR.RELATION_ID = WU.WORKSHOP_ID) BIREFIND_NUM
+			,(select count(FQ.ID) from FAQ_QUESTION FQ where FQ.IS_DELETED = 'N' and FQ.CREATOR = WU.USER_ID and FQ.RELATION_ID = WU.WORKSHOP_ID ) FAQ_QUESTION_NUM
+			,(select count(AR.ID) from ACTIVITY_RESULT AR where AR.IS_DELETED = 'N' and AR.CREATOR = WU.USER_ID and AR.RELATION_ID = WU.WORKSHOP_ID and AR.STATE = 'complete') ACTIVITY_COMPLETE_NUM
+		from WORKSHOP_USER WU
+		join WORKSHOP W on W.ID = WU.WORKSHOP_ID and W.IS_DELETED = 'N'
+		join WORKSHOP_USER_RESULT WUR on WUR.WORKSHOP_USER_ID = WU.ID
+		where WU.IS_DELETED='N'
+		and WU.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="selectWithActionInfo" parameterType="map" resultMap="BaseResultMap">
+		select	WU.ID,WU.WORKSHOP_ID,WU.USER_ID,WU.ROLE,WU.STATE,WU.CREATOR,WU.CREATE_TIME,
+		(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = WU.USER_ID) USER_REAL_NAME,
+		(select BUV.AVATAR from BASE_USER_VIEW BUV where BUV.ID = WU.USER_ID) USER_AVATAR,
+		(select BUV.DEPT_NAME from BASE_USER_VIEW BUV where BUV.ID = WU.USER_ID) USER_DEPT_NAME,
+		W.TITLE,W.SOURCE_ID,W.QUALIFIED_POINT,W.START_TIME,W.END_TIME,W.TYPE
+		,(select count(A.ID) from ACTIVITY A where A.IS_DELETED='N' and A.CREATOR = WU.USER_ID and A.RELATION_ID in (select WS.ID from WORKSHOP_SECTION WS where WS.WORKSHOP_ID = WU.WORKSHOP_ID )) ACTIVITY_NUM
+		,(select count(FA.ID) from FAQ_ANSWER FA join FAQ_QUESTION FQ on FA.QUESTION_ID = FQ.ID and FA.IS_DELETED='N' where FA.CREATOR = WU.USER_ID and FQ.RELATION_ID = WU.WORKSHOP_ID ) FAQ_ANSWER_NUM
+		,(select count(FR.ID) from FILE_RESOURCE FR join FILE_RELATION FR1 on FR.ID = FR1.FILE_ID and FR.IS_DELETED = 'N' where FR.CREATOR = WU.USER_ID and FR.IS_FOLDER = 'N' and FR1.RELATION_ID = WU.WORKSHOP_ID ) UPLOAD_RESOURCE_NUM
+		,(select count(C.ID) from COMMENTS C where C.IS_DELETED = 'N' and  C.RELATION_ID = WU.WORKSHOP_ID and C.CREATOR = WU.USER_ID) COMMENTS_NUM
+		,(select count(A.ID) from ANNOUNCEMENT A join ANNOUNCEMENT_RELATION AR on AR.ANNOUNCEMENT_ID = A.ID and A.IS_DELETED = 'N' and A.TYPE='workshop_announcement' where A.CREATOR = WU.USER_ID and AR.RELATION_ID = WU.WORKSHOP_ID) ANNOUNCEMENT_NUM
+		,(select count(A.ID) from ANNOUNCEMENT A join ANNOUNCEMENT_RELATION AR on AR.ANNOUNCEMENT_ID = A.ID and A.IS_DELETED = 'N' and A.TYPE='workshop_briefing' where A.CREATOR = WU.USER_ID and AR.RELATION_ID = WU.WORKSHOP_ID) BIREFIND_NUM
+		,(select count(AR.ID) from ACTIVITY_RESULT AR where AR.IS_DELETED = 'N' and AR.CREATOR = WU.USER_ID and AR.RELATION_ID = WU.WORKSHOP_ID and AR.STATE = 'complete') ACTIVITY_COMPLETE_NUM
+		<trim prefix="," suffixOverrides="," >
+			<if test="getCompleteVideoNum != null and getCompleteVideoNum != ''">
+				(select count(AR.ID) from ACTIVITY_RESULT AR join ACTIVITY A on A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='video' where AR.RELATION_ID = WU.WORKSHOP_ID and AR.STATE = 'complete' and AR.CREATOR = WU.USER_ID ) COMPLETE_VIDEO_NUM,
+			</if>
+			<if test="getCompleteDiscussionNum != null and getCompleteDiscussionNum != ''">
+				(select count(AR.ID) from ACTIVITY_RESULT AR join ACTIVITY A on A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='discussion' where AR.RELATION_ID = WU.WORKSHOP_ID and AR.STATE = 'complete' and AR.CREATOR = WU.USER_ID ) COMPLETE_DISCUSSION_NUM,
+			</if>
+			<if test="getCompleteLessonPlanNum != null and getCompleteLessonPlanNum != ''">
+				(select count(AR.ID) from ACTIVITY_RESULT AR join ACTIVITY A on A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='lessonPlan' where AR.RELATION_ID = WU.WORKSHOP_ID and AR.STATE = 'complete' and AR.CREATOR = WU.USER_ID ) COMPLETE_LESSON_PLAN_NUM,
+			</if>
+			<if test="getCompleteLcecNum != null and getCompleteLcecNum != ''">
+				(select count(AR.ID) from ACTIVITY_RESULT AR join ACTIVITY A on A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='lcec' where AR.RELATION_ID = WU.WORKSHOP_ID and AR.STATE = 'complete' and AR.CREATOR = WU.USER_ID ) COMPLETE_LCEC_NUM,
+			</if>
+			<if test="getCompleteTestNum != null and getCompleteTestNum != ''">
+				(select count(AR.ID) from ACTIVITY_RESULT AR join ACTIVITY A on A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='test' where AR.RELATION_ID = WU.WORKSHOP_ID and AR.STATE = 'complete' and AR.CREATOR = WU.USER_ID ) COMPLETE_TEST_NUM
+			</if>
+		</trim>
+		from WORKSHOP_USER WU
+		join WORKSHOP W on W.ID = WU.WORKSHOP_ID and W.IS_DELETED = 'N'
+		<if test="relationIdInTrain !=null and relationIdInTrain != ''">
+			join WORKSHOP_RELATION WR on WR.WORKSHOP_ID = W.ID
+		</if>
+		where WU.IS_DELETED = 'N'
+		<if test="workshopId != null and workshopId != ''">
+			and WU.WORKSHOP_ID = #{workshopId,jdbcType=VARCHAR}
+		</if>
+		<if test="userId != null and userId != ''">
+			and WU.USER_ID = #{userId,jdbcType=VARCHAR}
+		</if>
+		<if test="role != null and role != ''">
+			and #{role}  like concat(concat('%',WU.ROLE),'%')
+		</if>
+		<if test="realName != null and realName != ''">
+			and exists (select 1 from BASE_USER_VIEW where ID = WU.USER_ID and REAL_NAME like '%${realName}%')			
+		</if>
+		<if test="deptName != null and deptName != ''">
+			and exists (select 1 from BASE_USER_VIEW where ID = WU.USER_ID and DEPT_NAME = #{deptName,jdbcType=VARCHAR})		
+		</if>
+		<if test="title != null and title != ''">
+			and W.TITLE like concat(concat('%',#{title,jdbcType=VARCHAR}),'%')
+		</if>
+		<if test="type != null and type != ''">
+			and W.TYPE = #{type,jdbcType=VARCHAR}
+		</if>
+		<if test="roleNotEqual != null and roleNotEqual != ''">
+			and WU.ROLE != #{roleNotEqual,jdbcType=VARCHAR}
+		</if>
+		<if test="isTemplate != null and isTemplate !=  ''">
+			and W.IS_TEMPLATE = #{isTemplate,jdbcType=VARCHAR}
+		</if>
+		<if test="relationIdInTrain !=null and relationIdInTrain != ''">
+			and exists(select 1 from TRAIN T where T.ID = WR.RELATION_ID)
+		</if>
+		<if test="states != null and states.size > 0">
+			and WU.STATE in
+			<foreach collection="states" open="(" close=")" item="item" separator=",">
+				#{item,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<!-- worker 这个参数查询只为查 培训工作坊的master member 和个人工作坊的master的工作统计 -->
+		<if test="worker != null and worker != ''">
+			and ((W.TYPE = 'train' and WU.ROLE != 'student') or (W.TYPE = 'personal' and WU.ROLE = 'master'))
+		</if>
+	</select>
+	
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.wsts.workshop.entity.WorkshopUser">
+		update WORKSHOP_USER
+		<set>
+			<if test="role != null">
+				ROLE = #{role,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			VERSION = VERSION+1
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.wsts.workshop.entity.WorkshopUser">
+	</update>
+	
+	<delete id="deleteByPhysics" parameterType="java.lang.String">
+		delete from WORKSHOP_USER
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	
+	<delete id="batchDelete" parameterType="java.util.List">
+		delete from WORKSHOP_USER
+		where ID in
+		<foreach collection="list" open="(" close=")" item="item" separator=",">
+			#{item,jdbcType=VARCHAR}
+		</foreach>
+	</delete>
+	
+</mapper>

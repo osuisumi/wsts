@@ -1,0 +1,8 @@
+﻿<jscompress public="http://www.jscompress.cn/" command="import-combineset">
+<combinefile path="app.css">
+    <css_fixedrelativeurl value="1" />
+    <sourcefile path=".\reset.css" />
+    <sourcefile path=".\activity-common.css" />
+    <sourcefile path=".\workshop.css" />
+</combinefile>
+</jscompress>

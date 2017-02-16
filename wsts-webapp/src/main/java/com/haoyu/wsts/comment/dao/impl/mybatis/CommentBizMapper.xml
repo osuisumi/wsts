@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.wsts.comment.dao.impl.mybatis.CommentBizMapper">
+	<resultMap type="com.haoyu.wsts.comment.entity.Comment" id="BaseResultMap">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="CHILD_NUM" property="childNum" jdbcType="DECIMAL" />
+		<result column="MAIN_ID" property="mainId" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="INTEGER" />
+		<result column="CONTENT" property="content" jdbcType="VARCHAR" />
+		<result column="EVALUATE_SCORE" property="evaluateScore" jdbcType="DECIMAL" />
+		<result column="PARENT_ID" property="parentId" jdbcType="VARCHAR" />
+		<result column="TARGET_ID" property="targetId" jdbcType="VARCHAR" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="REAL_NAME" property="creator.realName" jdbcType="VARCHAR" />
+		<result column="AVATAR" property="creator.avatar" jdbcType="VARCHAR" />
+		<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+		<result column="RELATION_TYPE" property="relation.type" jdbcType="VARCHAR" />
+		<result column="SUPPORT_NUM" property="supportNum" jdbcType="INTEGER" />
+	</resultMap>
+
+	<select id="select" parameterType="map" resultMap="BaseResultMap">
+		select
+			C.ID,
+			C.RELATION_ID,
+			C.CHILD_NUM,
+			C.CREATOR,
+			C.CREATE_TIME,
+			C.CONTENT,
+			C.RELATION_TYPE,
+			C.EVALUATE_SCORE,
+			C.MAIN_ID,
+			C.PARENT_ID,
+			BUV.REAL_NAME,
+			BUV.AVATAR,
+			C.TARGET_ID,
+			(select count(id) from ATTITUDE_USER AU where AU.IS_DELETED = 'N' and AU.ATTITUDE = 'support' and AU.RELATION_ID = C.ID) as SUPPORT_NUM
+		from
+			COMMENTS C
+		join BASE_USER_VIEW BUV on BUV.ID = C.CREATOR
+		where
+			C.IS_DELETED = 'N'
+		<if test="relationId != null and relationId != ''">
+			and C.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="targetId != null and targetId != ''">
+			and C.TARGET_ID like concat(concat('%',#{targetId}),'%')
+		</if>
+		<if test="creatorOrTarget != null and creatorOrTarget != '' and userId != null and userId != ''">
+			and C.CREATOR = #{userId,jdbcType=VARCHAR} or C.TARGET_ID = #{userId,jdbcType=VARCHAR}
+		</if>
+		<choose>
+			<when test="isIncludeChildren != null and isIncludeChildren == true">
+			
+			</when>
+			<otherwise>
+				<choose>
+					<when test="mainId != null and mainId != ''">
+						and C.MAIN_ID = #{mainId,jdbcType=VARCHAR}
+					</when>
+					<otherwise>
+						and (C.MAIN_ID is null or C.MAIN_ID = 'null')
+					</otherwise>
+				</choose>
+			</otherwise>
+		</choose>
+		<if test="relationUserId != null and relationUserId != ''" >
+			and 
+			(	
+				C.TARGET_ID is null or C.TARGET_ID = '' 
+				or C.CREATOR = #{relationUserId,jdbcType=VARCHAR}
+				or C.TARGET_ID = #{relationUserId,jdbcType=VARCHAR}
+			)
+		</if>
+	</select>
+	
+	<select id="selectCount" parameterType="map" resultType="int">
+		select 
+			count(ID)
+		from COMMENTS
+		where IS_DELETED = 'N'
+		<if test="mainId != null and mainId != ''">
+			<choose>
+				<when test="mainId == 'null'">
+					and (MAIN_ID is null or MAIN_ID = 'null')
+				</when>
+				<otherwise>
+					and MAIN_ID = #{mainId, jdbcType=VARCHAR}
+				</otherwise>
+			</choose>
+		</if>
+		<if test="creator != null and creator != ''">
+			and CREATOR = #{creator, jdbcType=VARCHAR}
+		</if>
+		<if test="relationId != null and relationId != ''">
+			and RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="targetId != null and targetId != ''">
+			and TARGET_ID like concat(concat('%',#{targetId}),'%')
+		</if>
+		<if test="creatorOrTarget != null and creatorOrTarget != '' and userId != null and userId != ''">
+			and (CREATOR = #{userId,jdbcType=VARCHAR} or TARGET_ID = #{userId,jdbcType=VARCHAR} or TARGET_ID = '' or TARGET_ID is null)
+		</if>
+	</select>
+</mapper>

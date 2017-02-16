@@ -1,0 +1,15 @@
+.m-no-res {
+  width:100%;
+  min-height: 290px;
+  background: #fff;
+  overflow: hidden; }
+
+.u-nores-bg {
+  height: 100px;
+  line-height: 100px;
+  max-width: 140px;
+  padding-left: 100px;
+  font-size: 14px;
+  color: #9c9c9c;
+  margin: 95px auto 0;
+  background: url(images/res-bg.png) no-repeat; }

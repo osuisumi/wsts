@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoyu.wsts.workshop.dao.impl.mybatis.WorkshopRelationMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.wsts.workshop.entity.WorkshopRelation">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="WORKSHOP_ID" property="workshopId" jdbcType="VARCHAR"/>
+		<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR"/>
+		<result column="RELATION_TYPE" property="relation.type" jdbcType="VARCHAR"/>
+		<result column="MEMBER_NUM" property="memberNum" jdbcType="VARCHAR"/>
+		<result column="STUDENT_NUM" property="studentNum" jdbcType="VARCHAR"/>
+		<result column="ACTIVITY_NUM" property="activityNum" jdbcType="VARCHAR"/>
+		<result column="RESOURCE_NUM" property="resourceNum" jdbcType="VARCHAR"/>
+		<result column="QUESTION_NUM" property="questionNum" jdbcType="VARCHAR"/>
+		<result column="COMMENTS_NUM" property="commentsNum" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		WR.ID,WR.WORKSHOP_ID,WR.RELATION_ID,WR.RELATION_TYPE
+	</sql>
+	
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select <include refid="Base_Column_List" />
+		from WORKSHOP_RELATION WR
+		where WR.IS_DELETED = 'N'
+		and WR.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="select" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List" />
+		from WORKSHOP_RELATION WR
+		where WR.IS_DELETED = 'N'
+	</select>
+	
+	<insert id="insert" parameterType="com.haoyu.wsts.workshop.entity.WorkshopRelation">
+		insert into WORKSHOP_RELATION
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">ID,</if>
+			<if test="workshopId != null">WORKSHOP_ID,</if>
+			<if test="relation != null and relation.id != null">RELATION_ID,</if>
+			<if test="relation !=null and relation.type != null">RELATION_TYPE,</if>
+			<if test="creator != null and creator.id != null">CREATOR,</if>
+			<if test="createTime != null">CREATE_TIME,</if>
+			<if test="version != null">VERSION,</if>
+			<if test="isDeleted != null">IS_DELETED,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">#{id,jdbcType=VARCHAR},</if>
+			<if test="workshopId != null">#{workshopId,jdbcType=VARCHAR},</if>
+			<if test="relation != null and relation.id != null">#{relation.id,jdbcType=VARCHAR},</if>
+			<if test="relation !=null and relation.type != null">#{relation.type,jdbcType=VARCHAR},</if>
+			<if test="creator != null and creator.id != null">#{creator.id,jdbcType=VARCHAR},</if>
+			<if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
+			<if test="version != null">#{version,jdbcType=VARCHAR},</if>
+			<if test="isDeleted != null">#{isDeleted,jdbcType=VARCHAR},</if>
+		</trim>
+	</insert>
+	<update id="updateByWorkshopId" parameterType="com.haoyu.wsts.workshop.entity.WorkshopRelation">
+		update WORKSHOP_RELATION
+		<set>
+			<if test="relation!= null and relation.id != null">
+				RELATION_ID = #{relation.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			VERSION = VERSION+1
+		</set>
+		where WORKSHOP_ID = #{workshopId,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="batchUpdate" parameterType="map">
+		update WORKSHOP_RELATION
+		<set>
+			<if test="relationId != null">
+				RELATION_ID = #{relationId,jdbcType=VARCHAR},
+			</if>
+			VERSION = VERSION+1
+		</set>
+		where WORKSHOP_ID in 
+		<foreach collection="workshopIds" open="(" close=")" item="item" separator="," >
+			#{item,jdbcType=VARCHAR}
+		</foreach>
+	</update>
+	
+	<update id="deleteByLogic" parameterType="com.haoyu.wsts.workshop.entity.WorkshopRelation">
+	</update>
+</mapper>

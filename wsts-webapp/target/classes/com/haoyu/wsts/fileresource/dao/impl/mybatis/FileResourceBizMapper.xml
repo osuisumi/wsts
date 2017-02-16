@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.wsts.fileresource.dao.impl.mybatis.FileResourceBizMapper">
+	<resultMap id="UserFileCountMap" type="map">
+		<result column="CREATOR" property="creator" jdbcType="VARCHAR" />
+		<result column="REAL_NAME" property="realName" jdbcType="VARCHAR" />
+		<result column="AVATAR" property="avatar" jdbcType="VARCHAR" />
+		<result column="COUNT" property="count" jdbcType="INTEGER" />
+	</resultMap>
+
+	<select id="getFileCount" resultType="int" parameterType="map">
+		select count(FR.ID) from FILE_RESOURCE FR
+		join FILE_RELATION FR1 on FR1.FILE_ID = FR.ID
+		and FR.IS_FOLDER = 'N' and FR.IS_DELETED = 'N'
+		<where>
+			<if test="relationId != null and relationId != ''">
+				and FR1.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+			</if>
+			<if test="creator != null and creator != ''">
+				and FR.CREATOR = #{creator,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+	<select id="selectUserFileCount" parameterType="map" resultMap="UserFileCountMap">
+		select TMP.FILE_NUM,TMP.CREATOR,BUV.REAL_NAME,BUV.AVATAR
+		from
+		(
+			select
+				FR.CREATOR,
+				count(FR.ID) FILE_NUM
+			FROM
+				FILE_RESOURCE FR
+			JOIN FILE_RELATION FR1 ON FR1.FILE_ID = FR.ID
+			and FR.IS_DELETED = 'N' and FR.IS_FOLDER = 'N'
+			and relation_id = #{relationId,jdbcType=VARCHAR}
+			GROUP BY
+			FR.CREATOR
+		) TMP
+		JOIN BASE_USER_VIEW BUV on BUV.ID = tmp.CREATOR
+		<if test="realName != null and realName != ''">
+			 and REAL_NAME like '%${realName}%'
+		</if>
+		order by TMP.FILE_NUM desc
+	</select>
+</mapper>

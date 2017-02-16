@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoyu.wsts.workshop.dao.impl.mybatis.WorkshopUserResultMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.wsts.workshop.entity.WorkshopUserResult">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="WORKSHOP_USER_ID" property="workshopUser.id" jdbcType="VARCHAR"/>
+		<result column="LEARN_MINUTE_LENGTH" property="learnMinuteLength" jdbcType="VARCHAR"/>
+		<result column="POINT" property="point" jdbcType="DECIMAL"/>
+		<result column="WORKSHOP_RESULT" property="workshopResult" jdbcType="VARCHAR"/>
+		<result column="WORKSHOP_RESULT_CREATOR" property="workshopResultCreator.id" jdbcType="VARCHAR"/>
+		<result column="WORKSHOP_RESULT_CREATOR_NAME" property="workshopResultCreator.realName" jdbcType="VARCHAR"/>
+		<result column="FINALLY_RESULT" property="finallyResult" jdbcType="VARCHAR"/>
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR"/>
+		<result column="CREATE_TIME" property="createTime" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		WUR.ID,WUR.WORKSHOP_USER_ID,WUR.LEARN_MINUTE_LENGTH,WUR.POINT,WUR.WORKSHOP_RESULT,WUR.WORKSHOP_RESULT_CREATOR,WUR.FINALLY_RESULT,WUR.CREATOR,WUR.CREATE_TIME,
+		BUV.REAL_NAME WORKSHOP_RESULT_CREATOR_NAME
+	</sql>
+	
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select <include refid="Base_Column_List" />
+		from WORKSHOP_USER_RESULT WUR
+		left join BASE_USER_VIEW BUV on WUR.WORKSHOP_RESULT_CREATOR = BUV.ID
+		where WUR.IS_DELETED = 'N'
+		and (WUR.ID = #{id,jdbcType=VARCHAR} or WUR.WORKSHOP_USER_ID = #{id,jdbcType=VARCHAR})
+	</select>
+	
+	<select id="select" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List" />
+		from WORKSHOP_USER_RESULT WUR
+		left join BASE_USER_VIEW BUV on WUR.WORKSHOP_RESULT_CREATOR = BUV.ID
+		where WUR.IS_DELETED = 'N'
+		<if test="workshopUserId != null and workshopUserId != ''">
+			and WUR.WORKSHOP_USER_ID = #{workshopUserId,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<insert id="insert" parameterType="com.haoyu.wsts.workshop.entity.WorkshopUserResult">
+		insert into WORKSHOP_USER_RESULT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">ID,</if>
+			<if test="workshopUser != null and workshopUser.id != null">WORKSHOP_USER_ID,</if>
+			<if test="learnMinuteLength != null">LEARN_MINUTE_LENGTH,</if>
+			<if test="point != null">POINT,</if>
+			<if test="workshopResult != null">WORKSHOP_RESULT,</if>
+			<if test="workshopResultCreator != null and workshopResultCreator.id != null">WORKSHOP_RESULT_CREATOR,</if>
+			<if test="finallyResult != null">FINALLY_RESULT,</if>
+			<if test="creator != null and creator.id != null">CREATOR,</if>
+			<if test="createTime != null">CREATE_TIME,</if>
+			<if test="version != null">VERSION,</if>
+			<if test="isDeleted != null">IS_DELETED,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">#{id,jdbcType=VARCHAR},</if>
+			<if test="workshopUser != null and workshopUser.id != null">#{workshopUser.id,jdbcType=VARCHAR},</if>
+			<if test="learnMinuteLength != null">#{learnMinuteLength,jdbcType=VARCHAR},</if>
+			<if test="point != null">#{point,jdbcType=DECIMAL},</if>
+			<if test="workshopResult != null">#{workshopResult,jdbcType=VARCHAR},</if>
+			<if test="workshopResultCreator != null and workshopResultCreator.id != null">#{workshopResultCreator.id,jdbcType=VARCHAR},</if>
+			<if test="finallyResult != null">#{finallyResult,jdbcType=VARCHAR},</if>
+			<if test="creator != null and creator.id != null">#{creator.id,jdbcType=VARCHAR},</if>
+			<if test="createTime != null">#{createTime,jdbcType=VARCHAR},</if>
+			<if test="version != null">#{version,jdbcType=DECIMAL},</if>
+			<if test="isDeleted != null">#{isDeleted,jdbcType=VARCHAR},</if>
+		</trim>
+	</insert>
+	<update id="update" parameterType="com.haoyu.wsts.workshop.entity.WorkshopUserResult">
+		update WORKSHOP_USER_RESULT WUR
+		<set>
+			<if test="point != null">
+				POINT = #{point,jdbcType=DECIMAL},
+			</if>
+			<if test="learnMinuteLength != null">
+				LEARN_MINUTE_LENGTH = #{learnMinuteLength,jdbcType=DECIMAL},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			VERSION = VERSION+1
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+		or WORKSHOP_USER_ID = #{id,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="batchUpdateWorkshopResult" parameterType="map">
+		update WORKSHOP_USER_RESULT WUR
+		set WUR.WORKSHOP_RESULT = #{workshopResult,jdbcType=VARCHAR},
+		WUR.WORKSHOP_RESULT_CREATOR = #{workshopResultCreator,jdbcType=VARCHAR}
+		where WUR.WORKSHOP_USER_ID in
+		<foreach collection="workshopUserIds" open="(" close=")" item="item" separator=",">
+			#{item,jdbcType=VARCHAR}
+		</foreach>
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.wsts.workshop.entity.WorkshopUserResult">
+	</update>
+	
+	<delete id="deleteByWorkshopUserIds" parameterType="java.util.List">
+		delete from WORKSHOP_USER_RESULT 
+		where WORKSHOP_USER_ID in
+		<foreach collection="list" open="(" close=")" item="item" separator=",">
+			#{item,jdbcType=VARCHAR}
+		</foreach>
+	</delete>
+</mapper>

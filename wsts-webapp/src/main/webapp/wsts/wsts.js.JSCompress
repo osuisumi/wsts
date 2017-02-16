@@ -1,0 +1,22 @@
+﻿<jscompress public="http://www.jscompress.cn/" command="import-combineset">
+<combinefile path="wsts.js">
+    <sourcefile path=".\js\activity-argue.js" />
+    <sourcefile path=".\js\activity-common.js" />
+    <sourcefile path=".\js\activity-file.js" />
+    <sourcefile path=".\js\addCourse.js" />
+    <sourcefile path=".\js\addTag.js" />
+    <sourcefile path=".\js\addTestQuestion.js" />
+    <sourcefile path=".\js\addTopic.js" />
+    <sourcefile path=".\js\common.js" />
+    <sourcefile path=".\js\courseLearning.js" />
+    <sourcefile path=".\js\evaluateStar.js" />
+    <sourcefile path=".\js\index.js" />
+    <sourcefile path=".\js\jquery.searchableSelect.js" />
+    <sourcefile path=".\js\selectUser.js" />
+    <sourcefile path=".\js\sip-common.js" />
+    <sourcefile path=".\js\tag.js" />
+    <sourcefile path=".\js\uploadImage.js" />
+    <sourcefile path=".\js\workshop.js" />
+    <sourcefile path=".\js\workshop_section.js" />
+</combinefile>
+</jscompress>

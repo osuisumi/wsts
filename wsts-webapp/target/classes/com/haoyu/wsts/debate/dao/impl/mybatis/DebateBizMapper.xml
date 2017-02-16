@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.wsts.debate.dao.impl.mybatis.DebateBizMapper">
+	<resultMap type="com.haoyu.aip.debate.entity.Debate" id="BaseResultMap">
+		<id column="ID" property="id" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<select id="getDebateByDebateUserId" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select D.ID from DEBATE D 
+		join DEBATE_RELATION DR on D.ID = DR.DEBATE_ID
+		join DEBATE_USER DU on DU.DEBATE_RELATION_ID = DR.ID and DU.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	
+</mapper>
